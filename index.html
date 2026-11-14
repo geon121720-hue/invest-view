@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>내 투자 보기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --bg: #000; --card: #0a0a0a; --line: #1f1f1f; --text: #ededed; --muted: #8f8f8f;
+    --accent: #0B6623; --accent-text: #3ccf6a; --up: #f04452; --down: #3d8bfd; --warn: #f5a524;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body { font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, sans-serif;
+         font-size: 15px; line-height: 1.5; -webkit-text-size-adjust: 100%;
+         padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  main { max-width: 640px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-size: 20px; margin: 8px 0 2px; letter-spacing: -0.02em; }
+  h2 { font-size: 15px; margin: 28px 0 10px; color: var(--muted); font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .k { color: var(--muted); font-size: 12px; }
+  .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .v small { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+         padding: 11px 0; border-top: 1px solid var(--line); }
+  .row:first-child { border-top: 0; padding-top: 0; }
+  .row:last-child { padding-bottom: 0; }
+  .name { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 6px;
+           border: 1px solid var(--line); color: var(--muted); margin-left: 4px; vertical-align: 1px; font-weight: 500; }
+  .up { color: var(--up); } .down { color: var(--down); } .muted { color: var(--muted); } .warn { color: var(--warn); }
+  .buy { color: var(--up); font-weight: 600; } .sell { color: var(--down); font-weight: 600; }
+  .bar { height: 6px; background: #1a1a1a; border-radius: 3px; overflow: hidden; margin-top: 8px; position: relative; }
+  .bar i { display: block; height: 100%; background: var(--accent-text); }
+  .bar b { position: absolute; top: -3px; width: 2px; height: 12px; background: var(--text); }
+  .issue { margin-top: 10px; }
+  .issue h3 { font-size: 15px; margin: 0 0 4px; }
+  .reco { padding: 10px 0; border-top: 1px solid var(--line); }
+  .reco:first-of-type { border-top: 0; }
+  .tag { font-size: 12px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .chip { font-size: 11px; padding: 2px 7px; border-radius: 999px; background: #151515; color: var(--muted); }
+  .chip.danger { color: var(--up); } .chip.warn { color: var(--warn); } .chip.good { color: var(--accent-text); }
+  .note { font-size: 12px; color: var(--muted); margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--line); }
+  svg { display: block; width: 100%; height: auto; }
+  /* 잠금 화면 */
+  #lock { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; }
+  input[type=password], input[type=text] {
+    width: 100%; font: inherit; font-size: 16px; color: var(--text); background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-top: 16px; }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button { width: 100%; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0;
+           border-radius: 10px; padding: 12px; margin-top: 10px; cursor: pointer; }
+  button:disabled { opacity: .6; }
+  button.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); width: auto;
+                 padding: 6px 10px; font-size: 13px; font-weight: 500; margin: 0; }
+  label.check { display: flex; gap: 8px; align-items: center; margin-top: 12px; color: var(--muted); font-size: 14px; }
+  .err { color: var(--up); font-size: 14px; margin-top: 10px; min-height: 1.5em; }
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <section id="lock">
+    <h1>내 투자 보기</h1>
+    <p class="sub">조회 전용 페이지예요. 암호를 넣어야 내용이 보여요.</p>
+    <form id="form" autocomplete="on">
+      <input type="text" name="username" value="invest-view" autocomplete="username" hidden>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="암호" required>
+      <label class="check"><input id="remember" type="checkbox"> 이 기기에서 기억하기</label>
+      <button id="go" type="submit">열기</button>
+      <div class="err" id="err"></div>
+    </form>
+    <p class="note">참고용 정보이며 투자 조언이 아닙니다. 이 페이지에서는 매매 주문을 할 수 없어요.</p>
+  </section>
+  <section id="app" hidden></section>
+</main>
+<script>
+"use strict";
+const KEY = "invest-view-pw";
+const store = {
+  get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
+  set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} },
+  clear() { try { localStorage.removeItem(KEY); } catch (e) {} },
+};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+async function unlock(pw) {
+  const box = await (await fetch("data.json?t=" + Date.now(), { cache: "no-store" })).json();
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({ name: "PBKDF2", hash: "SHA-256", salt: b64(box.salt), iterations: box.iter },
+    base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(box.iv) }, key, b64(box.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+// ---------- 숫자 ----------
+const won = (v) => v == null ? "-" : Math.round(v).toLocaleString("ko-KR") + "원";
+const man = (v) => {
+  if (v == null) return "-";
+  const a = Math.abs(v);
+  if (a >= 1e8) return (v / 1e8).toFixed(a >= 1e10 ? 0 : 2).replace(/\.?0+$/, "") + "억원";
+  if (a >= 1e4) return Math.round(v / 1e4).toLocaleString("ko-KR") + "만원";
+  return won(v);
+};
+const usd = (v) => v == null ? "-" : "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = (v, d = 1) => v == null ? "-" : Number(v).toFixed(d) + "%";
+const signed = (v, d = 1) => v == null ? "-" : (v > 0 ? "+" : "") + Number(v).toFixed(d) + "%";
+const tone = (v) => v > 0 ? "up" : v < 0 ? "down" : "muted";
+
+// ---------- 화면 ----------
+function render(d) {
+  const db = d.dashboard, p = d.plan;
+  const trades = p.rows.filter((r) => r.q);
+  const html = [];
+  html.push(`<div class="head"><div><h1>내 투자 보기</h1><div class="sub">기준 ${esc(d.generated_at)} · 조회 전용</div></div>
+    <button class="ghost" id="logout">잠그기</button></div>`);
+
+  html.push(`<h2>요약</h2><div class="grid">
+    <div class="card"><div class="k">총 자산</div><div class="v">${man(db.total)}</div></div>
+    <div class="card"><div class="k">현금</div><div class="v">${man(db.cash)} <small>${pct(db.cash_pct)}</small></div></div>
+    <div class="card"><div class="k">위험자산 (목표 ${pct(db.risk_target, 0)})</div><div class="v">${pct(db.risk_pct)}</div>
+      <div class="bar"><i style="width:${Math.min(100, db.risk_pct || 0)}%"></i><b style="left:${Math.min(100, db.risk_target || 0)}%"></b></div></div>
+    <div class="card"><div class="k">안전자산 (목표 ${pct(db.safe_target, 0)})</div><div class="v">${pct(db.safe_pct)}</div>
+      <div class="bar"><i style="width:${Math.min(100, db.safe_pct || 0)}%"></i><b style="left:${Math.min(100, db.safe_target || 0)}%"></b></div></div>
+  </div>
+  <p class="sub">목표 비중과의 최대 차이 ${pct(db.max_dev)}p${d.fx ? ` · 환율 ${Math.round(d.fx).toLocaleString("ko-KR")}원/달러` : ""}</p>`);
+  if (d.missing_price && d.missing_price.length)
+    html.push(`<p class="warn sub">가격을 못 가져온 종목이 있어 계산이 정확하지 않을 수 있어요: ${d.missing_price.map(esc).join(", ")}</p>`);
+
+  html.push(`<h2>리밸런싱 계산 결과</h2><div class="card">`);
+  if (!trades.length) html.push(`<div class="muted">지금은 조정이 필요 없어요 (허용 오차 ${pct(d.settings.band_pp, 0)}p 안).</div>`);
+  for (const r of trades) {
+    const us = r.currency === "USD";
+    const amt = us && r.amount_native ? `${usd(r.amount_native)} (약 ${man(r.amount)})` : man(r.amount);
+    html.push(`<div class="row"><div class="name">${esc(r.name)}${us ? '<span class="badge">미국</span>' : ""}
+      <div class="tag">${pct(r.weight)} → ${pct(r.after_weight)} (목표 ${pct(r.target_pct)})</div></div>
+      <div class="num"><div class="${r.q > 0 ? "buy" : "sell"}">${r.q > 0 ? "매수" : "매도"} ${Math.abs(r.q).toLocaleString("ko-KR")}주</div>
+      <div class="tag">${amt}</div></div></div>`);
+  }
+  if (trades.length) html.push(`<div class="row"><div class="muted">조정 후 현금</div><div class="num">${man(p.cash_after)} <span class="tag">${pct(p.cash_weight_after)}</span></div></div>`);
+  html.push(`</div><p class="sub">계산 결과만 보여줘요. 실제 매매는 증권사 앱에서 직접 판단해 주세요.</p>`);
+
+  html.push(`<h2>보유 종목</h2><div class="card">`);
+  for (const r of p.rows) {
+    const us = r.currency === "USD";
+    const price = us ? usd(r.price_native) : won(r.price);
+    html.push(`<div class="row"><div class="name">${esc(r.name)}${us ? '<span class="badge">미국</span>' : ""}${r.type === "safe" ? '<span class="badge">안전</span>' : ""}
+      <div class="tag">${Number(r.shares || 0).toLocaleString("ko-KR")}주 · ${price}</div></div>
+      <div class="num"><div>${man(r.value)}</div>
+      <div class="tag">${pct(r.weight)} / 목표 ${pct(r.target_pct)} · <span class="${tone(r.return_pct)}">${signed(r.return_pct)}</span></div></div></div>`);
+  }
+  html.push(`</div>`);
+
+  if (d.history && d.history.length > 1) html.push(`<h2>자산 추이</h2><div class="card">${chart(d.history)}</div>`);
+
+  html.push(`<h2>수혜주 관찰 후보</h2>`);
+  const disc = d.discovery;
+  if (!disc) html.push(`<div class="card muted">아직 분석 결과가 없어요.</div>`);
+  else {
+    html.push(`<p class="sub">${esc(disc.date)} 분석${disc.status === "ok" ? "" : " (일부만 완료)"} · 관찰 후보이며 매수 추천이 아닙니다.</p>`);
+    const shown = disc.issues.filter((it) => it.recos.length);
+    if (!shown.length) html.push(`<div class="card muted">이번 분석에서는 새 관찰 후보가 없어요.</div>`);
+    for (const it of shown) {
+      html.push(`<div class="card issue"><h3>${esc(it.name)}</h3>${it.description ? `<div class="tag">${esc(it.description)}</div>` : ""}`);
+      for (const c of it.recos) {
+        const chips = (c.warnings || []).map(([t, lv]) => `<span class="chip ${esc(lv)}">${esc(t)}</span>`).join("");
+        html.push(`<div class="reco"><div class="head"><div class="name">${esc(c.name)}${c.market === "US" ? '<span class="badge">미국</span>' : ""}${c.held ? '<span class="badge">보유 중</span>' : ""}</div>
+          <div class="num tag">점수 ${c.score == null ? "-" : Math.round(c.score)}</div></div>
+          ${c.one_line ? `<div class="tag">${esc(c.one_line)}</div>` : ""}${chips ? `<div class="chips">${chips}</div>` : ""}</div>`);
+      }
+      html.push(`</div>`);
+    }
+  }
+  html.push(`<p class="note">${esc(d.disclaimer)}<br>이 페이지는 GitHub가 하루 몇 번 자동으로 새로 만들어요. 입력·수정은 PC의 사이트에서 해 주세요.</p>`);
+  $("app").innerHTML = html.join("");
+  $("logout").onclick = () => { store.clear(); location.reload(); };
+}
+
+function chart(hist) {
+  const W = 600, H = 180, P = 8;
+  const pts = hist.map((h) => [Date.parse(h.date), h.total]);
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs) || x0 + 1, y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const sx = (x) => P + (W - 2 * P) * (x1 === x0 ? 1 : (x - x0) / (x1 - x0));
+  const sy = (y) => H - P - (H - 2 * P) * (y1 === y0 ? 0.5 : (y - y0) / (y1 - y0));
+  const line = pts.map((p, i) => (i ? "L" : "M") + sx(p[0]).toFixed(1) + "," + sy(p[1]).toFixed(1)).join("");
+  const area = line + `L${sx(x1).toFixed(1)},${H - P}L${sx(x0).toFixed(1)},${H - P}Z`;
+  const first = hist[0], last = hist[hist.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="총 자산 추이">
+      <path d="${area}" fill="#0B6623" fill-opacity="0.25"/><path d="${line}" fill="none" stroke="#3ccf6a" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg><div class="head tag" style="margin-top:6px"><span>${esc(first.date)} ${man(first.total)}</span><span>${esc(last.date)} ${man(last.total)}</span></div>`;
+}
+
+async function open(pw, remember) {
+  $("go").disabled = true; $("err").textContent = "여는 중…";
+  try {
+    const data = await unlock(pw);
+    if (remember) store.set(pw);
+    $("lock").hidden = true; $("app").hidden = false;
+    render(data);
+  } catch (e) {
+    store.clear();
+    $("err").textContent = e && e.name === "OperationError" ? "암호가 맞지 않아요." : "내용을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.";
+  } finally { $("go").disabled = false; }
+}
+
+$("form").addEventListener("submit", (e) => { e.preventDefault(); open($("pw").value, $("remember").checked); });
+const saved = store.get();
+if (saved) open(saved, true);
+</script>
+</body>
+</html>
